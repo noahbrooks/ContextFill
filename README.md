@@ -29,4 +29,4 @@ ContextFill is a Chrome extension that lets you highlight any text and launch cu
 
 ## License
 
-Refer to the [license file](LICENSE) included with this repository.
+Refer to the [GPLv3 file](LICENSE) included with this repository.

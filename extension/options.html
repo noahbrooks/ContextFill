@@ -8,16 +8,29 @@
   </head>
   <body>
     <main class="container">
-      <h1>ContextFill</h1>
+      <header class="brand-header">
+        <img src="icons/icon-128.png" alt="ContextFill logo" class="brand-mark" />
+        <div>
+          <h1>ContextFill</h1>
+          <p class="tagline">Highlight, normalize, and investigate IOCs in a click.</p>
+        </div>
+      </header>
       <p class="description">
         Configure categories that detect highlighted text using regular expressions. Each category can
-        include one or more URL templates. Use <code>{{selection}}</code> to insert the highlighted
-        text (URL encoded) or <code>{{rawSelection}}</code> to insert it without encoding.
+        include normalization rules that run before matching and URL templates that open in new tabs.
+        Use <code>{{selection}}</code> for the normalized, URL-encoded text, <code>{{normalizedSelection}}</code> for the normalized plain text, <code>{{rawSelection}}</code> for the original highlight, or <code>{{rawSelectionEncoded}}</code> for the original highlight encoded.
       </p>
 
       <div class="actions">
         <button id="addCategory" type="button">Add Category</button>
+        <button id="exportCategories" type="button" class="secondary">Export All</button>
+        <button id="importCategoriesTrigger" type="button" class="secondary">Import Backup</button>
+        <button id="importCategoryTrigger" type="button" class="secondary">Import Category</button>
+        <input id="importCategories" type="file" accept="application/json" hidden />
+        <input id="importCategory" type="file" accept="application/json" hidden />
       </div>
+
+      <p id="statusMessage" class="status-message" role="status" aria-live="polite"></p>
 
       <section id="categories" class="categories"></section>
     </main>
@@ -33,6 +46,24 @@
           <input type="text" class="template-url" placeholder="https://example.com/{{selection}}" />
         </label>
         <button type="button" class="remove-template">Remove</button>
+      </div>
+    </template>
+
+    <template id="replacement-row">
+      <div class="replacement-row">
+        <label>
+          <span>Pattern</span>
+          <input type="text" class="replacement-pattern" placeholder="\\[dot\\]" />
+        </label>
+        <label>
+          <span>Replacement</span>
+          <input type="text" class="replacement-value" placeholder="." />
+        </label>
+        <label class="flags-field">
+          <span>Flags</span>
+          <input type="text" class="replacement-flags" placeholder="gi" maxlength="6" />
+        </label>
+        <button type="button" class="remove-replacement">Remove</button>
       </div>
     </template>
 
