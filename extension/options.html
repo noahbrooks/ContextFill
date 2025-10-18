@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ContextFill Settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>ContextFill</h1>
+      <p class="description">
+        Configure categories that detect highlighted text using regular expressions. Each category can
+        include one or more URL templates. Use <code>{{selection}}</code> to insert the highlighted
+        text (URL encoded) or <code>{{rawSelection}}</code> to insert it without encoding.
+      </p>
+
+      <div class="actions">
+        <button id="addCategory" type="button">Add Category</button>
+      </div>
+
+      <section id="categories" class="categories"></section>
+    </main>
+
+    <template id="template-row">
+      <div class="template-row">
+        <label>
+          <span>Label</span>
+          <input type="text" class="template-label" placeholder="AbuseIPDB" />
+        </label>
+        <label class="url-field">
+          <span>URL template</span>
+          <input type="text" class="template-url" placeholder="https://example.com/{{selection}}" />
+        </label>
+        <button type="button" class="remove-template">Remove</button>
+      </div>
+    </template>
+
+    <script src="options.js" defer></script>
+  </body>
+</html>

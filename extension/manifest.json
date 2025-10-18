@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "ContextFill",
+  "version": "1.0.0",
+  "description": "Create dynamic context menu items from selected text using regex-driven URL templates.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html"
+}
