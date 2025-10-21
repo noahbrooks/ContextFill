@@ -59,6 +59,59 @@ function generateId(prefix) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+async function openTargetUrl(targetUrl) {
+  if (!targetUrl) {
+    return;
+  }
+
+  if (typeof chrome !== 'undefined' && chrome.tabs && typeof chrome.tabs.create === 'function') {
+    try {
+      const createdTab = await new Promise((resolve, reject) => {
+        try {
+          chrome.tabs.create({ url: targetUrl }, (tab) => {
+            const lastError = chrome.runtime && chrome.runtime.lastError;
+            if (lastError) {
+              reject(new Error(lastError.message));
+              return;
+            }
+            resolve(tab || true);
+          });
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      if (createdTab) {
+        return;
+      }
+    } catch (error) {
+      console.warn('ContextFill: chrome.tabs.create failed', targetUrl, error);
+    }
+  }
+
+  if (typeof clients !== 'undefined' && typeof clients.openWindow === 'function') {
+    try {
+      const client = await clients.openWindow(targetUrl);
+      if (client) {
+        return;
+      }
+    } catch (error) {
+      console.warn('ContextFill: clients.openWindow failed', targetUrl, error);
+    }
+  }
+
+  if (typeof globalThis !== 'undefined' && typeof globalThis.open === 'function') {
+    try {
+      globalThis.open(targetUrl, '_blank', 'noopener');
+      return;
+    } catch (error) {
+      console.warn('ContextFill: globalThis.open fallback failed', targetUrl, error);
+    }
+  }
+
+  console.warn('ContextFill: unable to open URL (no available API)', targetUrl);
+}
+
 const DEFAULT_CATEGORIES = [
   {
     id: 'default-ip-addresses',
@@ -398,14 +451,20 @@ async function buildMenus(selectionText) {
 }
 
 function handleOnShown(info) {
-  if (!info || typeof info.selectionText !== 'string') {
-    queueBuild('').then(() => {
-      refreshContextMenus();
-    });
+  const selectionFromEvent = typeof info?.selectionText === 'string' ? info.selectionText : null;
+  const trimmedSelection = selectionFromEvent ? selectionFromEvent.trim() : '';
+
+  if (!trimmedSelection) {
+    refreshContextMenus();
     return;
   }
 
-  queueBuild(info.selectionText).then(() => {
+  if (trimmedSelection === currentSelection) {
+    refreshContextMenus();
+    return;
+  }
+
+  queueBuild(trimmedSelection).then(() => {
     refreshContextMenus();
   });
 }
@@ -450,9 +509,8 @@ async function handleClick(info, tab) {
     const templates = (category.templates || []).filter((tpl) => tpl && tpl.urlTemplate);
     for (const template of templates) {
       const targetUrl = fillTemplate(template.urlTemplate, normalizedSelection, rawSelection);
-      if (targetUrl && chrome?.tabs && typeof chrome.tabs.create === 'function') {
-        chrome.tabs.create({ url: targetUrl });
-      }
+      // Use MV3-compatible window opening without requiring the tabs permission.
+      await openTargetUrl(targetUrl);
     }
     return;
   }
@@ -468,9 +526,7 @@ async function handleClick(info, tab) {
       return;
     }
 
-    if (typeof chrome !== 'undefined' && chrome.tabs && typeof chrome.tabs.create === 'function') {
-      chrome.tabs.create({ url: targetUrl });
-    }
+    await openTargetUrl(targetUrl);
   }
 }
 
